@@ -3,3 +3,34 @@ frameworkVersion: '>=1.2.0 <2.0.0'
 provider:
   name: aws
   runtime: nodejs8.10
+plugins:
+  - serverless-iam-roles-per-function
+  - serverless-cf-vars
+functions:
+  Function:
+    handler: index.handler
+    description:
+      Fn::Sub:
+        - 'Stack #{StackTagName} Environment #{EnvironmentTagName} Function #{ResourceName}'
+        - ResourceName: Function
+    runtime: nodejs8.10
+    tracing: Active
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - xray:PutTraceSegments
+          - xray:PutTelemetryRecords
+          - xray:GetSamplingRules
+          - xray:GetSamplingTargets
+          - xray:GetSamplingStatisticSummaries
+        Resource: '*'
+resources:
+  Parameters:
+    StackTagName:
+      Type: String
+      Description: Stack Name (injected by Stackery at deployment time)
+      Default: node8-serverless
+    EnvironmentTagName:
+      Type: String
+      Description: Environment Name (injected by Stackery at deployment time)
+      Default: dev
