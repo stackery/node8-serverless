@@ -24,6 +24,24 @@ functions:
           - xray:GetSamplingTargets
           - xray:GetSamplingStatisticSummaries
         Resource: '*'
+      - Effect: Allow
+        Action:
+          - sqs:SendMessage*
+        Resource:
+          Fn::GetAtt:
+            - Queue
+            - Arn
+    environment:
+      QUEUE_NAME:
+        Fn::GetAtt:
+          - Queue
+          - QueueName
+      QUEUE_ARN:
+        Fn::GetAtt:
+          - Queue
+          - Arn
+      QUEUE_URL:
+        Ref: Queue
 resources:
   Parameters:
     StackTagName:
@@ -34,3 +52,9 @@ resources:
       Type: String
       Description: Environment Name (injected by Stackery at deployment time)
       Default: dev
+  Resources:
+    Queue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName:
+          Fn::Sub: '#{AWS::StackName}-Queue'
